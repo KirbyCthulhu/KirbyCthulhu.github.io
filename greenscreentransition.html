@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<style>
+	body{
+	}
+	.bgimg{
+	    
+	
+ /* The background image used */
+background-image: url("https://kirbycthulhu.github.io/ChromaKey.jpg");
+position:absolute;
+top:0;
+left:0;
+ /* Full height */
+ height: 100vh; 
+ width: 100vw;
+
+ /* Hide scroll */
+ overflow-x: hidden;
+ overflow-y: hidden;
+
+ /* Center and scale the background image nicely */
+ background-position: center;
+ background-repeat: no-repeat;
+ background-size: cover;
+ z-index: 9999
+}
+	</style>
+	<script>
+	var i = 0;
+	var intervalInMs = 5000; // default inteval value
+	var showChromaKeyInSeconds = 5;
+	var hideChromaKeyInSeconds  = 5;
+	var run = null; 
+
+	function chromaController(){ 
+	    clearInterval(run); // stop the setInterval()
+	    if ($("#chromaKey").is(":visible")) {
+		$(".bgimg").fadeOut(300, function(){});
+		interval = hideChromaKeyInSeconds*1000; // convert to Ms
+	    }
+	    else {
+		$(".bgimg").fadeIn(300, function(){});
+		interval = showChromaKeyInSeconds*1000;  // convert to Ms
+	    }   
+		$('#intervalVal').html(interval);
+		run = setInterval(chromaController, interval);
+	}
+
+    	$(document).ready(function () {  
+        showChromaKeyInSeconds = GetParameterValues('showChromaKeyInSeconds');  
+        hideChromaKeyInSeconds = GetParameterValues('hideChromaKeyInSeconds');  
+	  interval = 1000*showChromaKeyInSeconds; //default to show at start and convert to ms
+        $('#intervalVal').html(interval);
+	  run = setInterval(chromaController, interval); // init interval
+        function GetParameterValues(param) {  
+            var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
+            for (var i = 0; i < url.length; i++) {  
+                var urlparam = url[i].split('=');  
+                if (urlparam[0] == param) {  
+                    return urlparam[1];  
+                }  
+            }  
+		return 5; // default if no querystring provided
+        }  
+	}); 
+
+	</script>
+	</head>
+	<body>
+
+	<div id="chromaKey" class="bgimg"></div>
+	</body>
+</html>
