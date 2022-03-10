@@ -52,7 +52,7 @@ left:0;
     	$(document).ready(function () {  
 		showChromaKeyInSeconds = GetParameterValues('showChromaKeyInSeconds');  
 		hideChromaKeyInSeconds = GetParameterValues('hideChromaKeyInSeconds'); 
-		if(showChromaKeyInSeconds = -1){return;} // escape value to just show a greenscreen
+		if(showChromaKeyInSeconds == -1){return;} // escape value to just show a greenscreen
 		interval = 1000*showChromaKeyInSeconds; //default to show at start and convert to ms
 		$('#intervalVal').html(interval);
 		  run = setInterval(chromaController, interval); // init interval
