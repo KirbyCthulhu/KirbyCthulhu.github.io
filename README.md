@@ -8,7 +8,7 @@ You can effectively turn any source into a hideable display.
 
 Takes two query strings:
 showChromaKeyInSeconds: Number of seconds to display green screen.  Use -1 for permanent greenscreen display.
-hideChromeKeyInSeconds: Number of seconds to hide green screen.
+hideChromeKeyInSeconds: Number of seconds to hide green screen.  Currently no permanent "white screen" as it didn't seem useful, but you could always set it stupidly high.
 
 Example:
 https://kirbycthulhu.github.io/greenscreentransition.html?showChromaKeyInSeconds=10&hideChromaKeyInSeconds=30
