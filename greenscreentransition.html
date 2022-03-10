@@ -50,19 +50,20 @@ left:0;
 	}
 
     	$(document).ready(function () {  
-        showChromaKeyInSeconds = GetParameterValues('showChromaKeyInSeconds');  
-        hideChromaKeyInSeconds = GetParameterValues('hideChromaKeyInSeconds');  
-	  interval = 1000*showChromaKeyInSeconds; //default to show at start and convert to ms
-        $('#intervalVal').html(interval);
-	  run = setInterval(chromaController, interval); // init interval
-        function GetParameterValues(param) {  
-            var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
-            for (var i = 0; i < url.length; i++) {  
-                var urlparam = url[i].split('=');  
-                if (urlparam[0] == param) {  
-                    return urlparam[1];  
-                }  
-            }  
+		showChromaKeyInSeconds = GetParameterValues('showChromaKeyInSeconds');  
+		hideChromaKeyInSeconds = GetParameterValues('hideChromaKeyInSeconds'); 
+		if(showChromaKeyInSeconds = -1){return;} // escape value to just show a greenscreen
+		interval = 1000*showChromaKeyInSeconds; //default to show at start and convert to ms
+		$('#intervalVal').html(interval);
+		  run = setInterval(chromaController, interval); // init interval
+		function GetParameterValues(param) {  
+		    var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
+		    for (var i = 0; i < url.length; i++) {  
+			var urlparam = url[i].split('=');  
+			if (urlparam[0] == param) {  
+			    return urlparam[1];  
+			}  
+		    }  
 		return 5; // default if no querystring provided
         }  
 	}); 
