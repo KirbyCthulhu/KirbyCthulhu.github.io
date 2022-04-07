@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/comfy.js/dist/comfy.min.js"></script>
+    </head>
+
+    <body>
+        <div class="container">
+            <video id="player" width="100%" height="100%" autoplay>
+                Your browser does not support the video tag.
+                <source id="playerSource" src="" type="video/mp4">
+              </video>
+            <div id="overlay" class="overlayText"></div>
+        </div>
+
+        <script>
+            var player = document.getElementById('player');
+            
+            const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+            });
+            // Get the value of "some_key" in eg "https://example.com/?some_key=some_value"
+            let channelValue = params.channel; 
+
+            ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+                if( flags.broadcaster && command === "so" ) {
+                    console.log( "!so was typed in chat" );
+                    var oReq = new XMLHttpRequest();
+                    // oReq.addEventListener("load", reqListener);
+                    // if (message.includes("clip/")) {
+                    //     console.log("true /");
+                    //     message = message.split("clip/");
+                    //     message = message[1];
+                    // }
+                    // if (message.includes("?")) {
+                    //     console.log("tr ?");
+                    //     message = message.split("?");
+                    //     message = message[0];
+                    // }
+                    // if (message.includes("clips.twitch.tv")) {
+                    //     console.log("clips.twitch");
+                    //     message = message.split(".tv/");
+                    //     message = message[1];
+                    // }
+                    oReq.open("GET", "https://api.eldergod.games/twitch-clips/random?broadcastername=" + message);
+                    oReq.send();
+                }
+            }
+            ComfyJS.Init( channelValue );
+        </script>
+    </body>
+</html>
