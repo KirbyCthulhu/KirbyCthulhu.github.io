@@ -1,0 +1,12 @@
+.fire {
+    color: #f5f5f5; /* Light text color */
+    text-align:center; /* Center alignment of text */
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
+    font-size: 80px; /* Text size */
+    /* Multi-layered text-shadow for fire effect */
+    text-shadow:
+    0px -1px 3px #fff, /* Innermost layer - intense heat (white) */
+    0px -2px 6px #FF3, /* Second layer - core of flame (yellow) */
+    0px -6px 12px #F90, /* Middle layer - body of flame (orange) */
+    0px -10px 20px #C33; /* Outermost layer - edges of flame (red) */
+   }
