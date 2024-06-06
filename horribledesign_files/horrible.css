@@ -10,3 +10,14 @@
     0px -6px 12px #F90, /* Middle layer - body of flame (orange) */
     0px -10px 20px #C33; /* Outermost layer - edges of flame (red) */
    }
+
+   .spoiler{
+    background-color: gray;
+    color: transparent;
+    user-select: none;
+  }
+  
+  .spoiler:hover{
+    background-color: inherit;
+    color: inherit;
+  }
