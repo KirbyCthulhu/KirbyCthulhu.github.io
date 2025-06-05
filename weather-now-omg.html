@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Summary</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+        }
+        h1 {
+            font-size: 3em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sparkle 2s infinite;
+        }
+        @keyframes sparkle {
+            0% {
+                text-shadow: 0 0 5px red, 0 0 10px orange, 0 0 15px yellow, 0 0 20px green, 0 0 25px blue, 0 0 30px indigo, 0 0 35px violet;
+            }
+            50% {
+                text-shadow: 0 0 10px violet, 0 0 15px indigo, 0 0 20px blue, 0 0 25px green, 0 0 30px yellow, 0 0 35px orange, 0 0 40px red;
+            }
+            100% {
+                text-shadow: 0 0 5px red, 0 0 10px orange, 0 0 15px yellow, 0 0 20px green, 0 0 25px blue, 0 0 30px indigo, 0 0 35px violet;
+            }
+        }
+        .weather-summary {
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sparkle 2s infinite;
+        }
+        .weather-gif {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Current Weather</h1>
+    <div class="weather-summary" id="weatherSummary">Loading...</div>
+    <div id="weatherGifContainer">
+        <img id="weatherGif" class="weather-gif" src="" alt="Weather Graphic" />
+    </div>
+
+    <script>
+        const weatherConditions = [
+            { "main": "Thunderstorm", "description": "Thunderstorm with light rain", "graphicSubtype": "Thunderstorm-Light" },
+            { "main": "Thunderstorm", "description": "Thunderstorm with rain", "graphicSubtype": "Thunderstorm-Moderate" },
+            { "main": "Thunderstorm", "description": "Thunderstorm with heavy rain", "graphicSubtype": "Thunderstorm-Heavy" },
+            { "main": "Thunderstorm", "description": "Light thunderstorm", "graphicSubtype": "Thunderstorm-Light" },
+            { "main": "Thunderstorm", "description": "Thunderstorm", "graphicSubtype": "Thunderstorm-Moderate" },
+            { "main": "Thunderstorm", "description": "Heavy thunderstorm", "graphicSubtype": "Thunderstorm-Heavy" },
+            { "main": "Thunderstorm", "description": "Ragged thunderstorm", "graphicSubtype": "Thunderstorm-Moderate" },
+            { "main": "Thunderstorm", "description": "Thunderstorm with light drizzle", "graphicSubtype": "Thunderstorm-Light" },
+            { "main": "Thunderstorm", "description": "Thunderstorm with drizzle", "graphicSubtype": "Thunderstorm-Moderate" },
+            { "main": "Thunderstorm", "description": "Thunderstorm with heavy drizzle", "graphicSubtype": "Thunderstorm-Heavy" },
+            { "main": "Drizzle", "description": "Light intensity drizzle", "graphicSubtype": "Rain-Light" },
+            { "main": "Drizzle", "description": "Drizzle", "graphicSubtype": "Rain-Moderate" },
+            { "main": "Drizzle", "description": "Heavy intensity drizzle", "graphicSubtype": "Rain-Heavy" },
+            { "main": "Drizzle", "description": "Light intensity drizzle rain", "graphicSubtype": "Rain-Light" },
+            { "main": "Drizzle", "description": "Drizzle rain", "graphicSubtype": "Rain-Moderate" },
+            { "main": "Drizzle", "description": "Heavy intensity drizzle rain", "graphicSubtype": "Rain-Heavy" },
+            { "main": "Drizzle", "description": "Shower rain and drizzle", "graphicSubtype": "Rain-Moderate" },
+            { "main": "Drizzle", "description": "Heavy shower rain and drizzle", "graphicSubtype": "Rain-Heavy" },
+            { "main": "Drizzle", "description": "Shower drizzle", "graphicSubtype": "Rain-Light" },
+            { "main": "Rain", "description": "Light rain", "graphicSubtype": "Rain-Light" },
+            { "main": "Rain", "description": "Moderate rain", "graphicSubtype": "Rain-Moderate" },
+            { "main": "Rain", "description": "Heavy intensity rain", "graphicSubtype": "Rain-Heavy" },
+            { "main": "Rain", "description": "Very heavy rain", "graphicSubtype": "Rain-Heavy" },
+            { "main": "Rain", "description": "Extreme rain", "graphicSubtype": "Rain-Extreme" },
+            { "main": "Rain", "description": "Freezing rain", "graphicSubtype": "Rain-Freezing" },
+            { "main": "Rain", "description": "Light intensity shower rain", "graphicSubtype": "Rain-Light" },
+            { "main": "Rain", "description": "Shower rain", "graphicSubtype": "Rain-Moderate" },
+            { "main": "Rain", "description": "Heavy intensity shower rain", "graphicSubtype": "Rain-Heavy" },
+            { "main": "Rain", "description": "Ragged shower rain", "graphicSubtype": "Rain-Moderate" },
+            { "main": "Snow", "description": "Light snow", "graphicSubtype": "Snow-Light" },
+            { "main": "Snow", "description": "Snow", "graphicSubtype": "Snow-Moderate" },
+            { "main": "Snow", "description": "Heavy snow", "graphicSubtype": "Snow-Heavy" },
+            { "main": "Snow", "description": "Sleet", "graphicSubtype": "Snow-Sleet" },
+            { "main": "Snow", "description": "Light shower sleet", "graphicSubtype": "Snow-Sleet" },
+            { "main": "Snow", "description": "Shower sleet", "graphicSubtype": "Snow-Sleet" },
+            { "main": "Snow", "description": "Light rain and snow", "graphicSubtype": "Snow-Mixed" },
+            { "main": "Snow", "description": "Rain and snow", "graphicSubtype": "Snow-Mixed" },
+            { "main": "Snow", "description": "Light shower snow", "graphicSubtype": "Snow-Light" },
+            { "main": "Snow", "description": "Shower snow", "graphicSubtype": "Snow-Moderate" },
+            { "main": "Snow", "description": "Heavy shower snow", "graphicSubtype": "Snow-Heavy" },
+            { "main": "Atmosphere", "description": "Mist", "graphicSubtype": "Atmosphere-Fog" },
+            { "main": "Atmosphere", "description": "Smoke", "graphicSubtype": "Atmosphere-Smoke" },
+            { "main": "Atmosphere", "description": "Haze", "graphicSubtype": "Atmosphere-Smoke" },
+            { "main": "Atmosphere", "description": "Sand/dust whirls", "graphicSubtype": "Atmosphere-Smoke" },
+            { "main": "Atmosphere", "description": "Fog", "graphicSubtype": "Atmosphere-Fog" },
+            { "main": "Atmosphere", "description": "Sand", "graphicSubtype": "Atmosphere-Smoke" },
+            { "main": "Atmosphere", "description": "Dust", "graphicSubtype": "Atmosphere-Smoke" },
+            { "main": "Atmosphere", "description": "Volcanic ash", "graphicSubtype": "Atmosphere-Smoke" },
+            { "main": "Atmosphere", "description": "Squalls", "graphicSubtype": "Atmosphere-Wind" },
+            { "main": "Atmosphere", "description": "Tornado", "graphicSubtype": "Atmosphere-Tornado" },
+            { "main": "Clear", "description": "Clear sky", "graphicSubtype": "Clear-Sky" },
+            { "main": "Clouds", "description": "Few clouds: 11-25%", "graphicSubtype": "Clouds-Scattered" },
+            { "main": "Clouds", "description": "Scattered clouds: 25-50%", "graphicSubtype": "Clouds-Scattered" },
+            { "main": "Clouds", "description": "Broken clouds: 51-84%", "graphicSubtype": "Clouds-Scattered" },
+            { "main": "Clouds", "description": "Overcast clouds: 85-100%", "graphicSubtype": "Clouds-Overcast" }
+        ];
+
+        async function fetchWeather() {
+            try {
+                const weatherResponse = await fetch(`https://get-weather-363541448806.us-central1.run.app/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-PINGOVER': 'pingpong'
+                    }
+                });
+                const weatherData = await weatherResponse.json();
+
+                const graphicSubtype = weatherConditions.find(condition => condition.description.toLowerCase() === weatherData.condition.toLowerCase())?.graphicSubtype || "Unknown";
+
+                const weatherSummary = document.getElementById('weatherSummary');
+                weatherSummary.textContent = `${graphicSubtype} In ${weatherData.location}`;
+                // Temperature: ${weatherData.temperature}°C
+                // Condition: ${weatherData.condition}`;
+
+                const weatherGif = document.getElementById('weatherGif');
+                const gifMap = {
+                    "Thunderstorm-Light": "weather-files/thunderstorm-light.gif",
+                    "Thunderstorm-Moderate": "weather-files/thunderstorm-moderate.gif",
+                    "Thunderstorm-Heavy": "weather-files/thunderstorm-heavy.gif",
+                    "Rain-Light": "weather-files/rain-light.gif",
+                    "Rain-Moderate": "weather-files/rain-moderate.gif",
+                    "Rain-Heavy": "weather-files/rain-heavy.gif",
+                    "Rain-Extreme": "weather-files/rain-extreme.gif",
+                    "Rain-Freezing": "weather-files/rain-freezing.gif",
+                    "Snow-Light": "weather-files/snow-light.gif",
+                    "Snow-Moderate": "weather-files/snow-moderate.gif",
+                    "Snow-Heavy": "weather-files/snow-heavy.gif",
+                    "Snow-Sleet": "weather-files/snow-sleet.gif",
+                    "Snow-Mixed": "weather-files/snow-mixed.gif",
+                    "Atmosphere-Smoke": "weather-files/atmosphere-smoke.gif",
+                    "Atmosphere-Fog": "weather-files/atmosphere-fog.gif",
+                    "Atmosphere-Wind": "weather-files/atmosphere-wind.gif",
+                    "Atmosphere-Tornado": "weather-files/atmosphere-tornado.gif",
+                    "Clear-Sky": "weather-files/clear-sky.gif",
+                    "Clouds-Scattered": "weather-files/clouds-scattered.gif",
+                    "Clouds-Overcast": "weather-files/clouds-overcast.gif"
+                };
+
+                weatherGif.src = gifMap[graphicSubtype] || "weather-files/default.gif";
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                document.getElementById('weatherSummary').textContent = 'Unable to retrieve weather data.';
+            }
+        }
+
+        fetchWeather();
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Color Generator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #80007a;
+            text-shadow: 0 0 10px #80007a, 0 0 20px #80007a, 0 0 30px #ff69b4;
+            margin-bottom: 20px;
+        }
+        .color-box {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .color-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Colour of the Day!</h1>
+    <div class="color-box" id="colorBox"></div>
+    <div class="color-name" id="colorName"></div>
+
+    <script>
+        function addDays(days) {
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            return date.toLocaleDateString();
+        }
+
+        function getDailyColor(dayString) {
+            const hash = Array.from(dayString).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const seed = (hash * 9301 + 49297) % 233280;
+            const r = Math.floor((seed * 123) % 256);
+            const g = Math.floor((seed * 456) % 256);
+            const b = Math.floor((seed * 789) % 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function seededShuffle(array, seed) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(seed % (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                seed = (seed * 9301 + 49297) % 233280;
+            }
+            return shuffled;
+        }
+
+        function getColorName(dayString) {
+            const adjectives = [
+                "Mystic", "Electric", "Dragonfruit", "Cosmic", "Lunar", 
+                "Velvet", "Bubblegum", "Celestial", "Rainbow", "Twilight",
+                "Glowing", "Shimmering", "Frosty", "Radiant", "Dreamy",
+                "Wobbly", "Zesty", "Fluffy", "Spicy", "Bouncy"
+            ];
+            const nouns = [
+                "Marshmallow", "Unicorn", "Delight", "Jellybean", "Lemonade", 
+                "Stardust", "Breeze", "Cactus", "Rhapsody", "Taffy",
+                "Cloud", "Mist", "Sparkle", "Blossom", "Glow",
+                "Pudding", "Whisker", "Cupcake", "Pebble", "Sprinkle"
+            ];
+
+            const hash = Array.from(dayString).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const shuffledAdjectives = seededShuffle(adjectives, hash);
+            const shuffledNouns = seededShuffle(nouns, hash * 7);
+
+            const adjective = shuffledAdjectives[0];
+            const noun = shuffledNouns[0];
+            return `${adjective} ${noun}`;
+        }
+
+        const colorBox = document.getElementById('colorBox');
+        const colorName = document.getElementById('colorName');
+        const dateSet = addDays(4);
+        const dailyColor = getDailyColor(dateSet);
+        const dailyName = getColorName(dateSet);
+
+        colorBox.style.backgroundColor = dailyColor;
+        colorName.textContent = dailyName;
+    </script>
+</body>
+</html>
