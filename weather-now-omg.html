@@ -111,10 +111,10 @@
             { "main": "Atmosphere", "description": "Squalls", "graphicSubtype": "Atmosphere-Wind" },
             { "main": "Atmosphere", "description": "Tornado", "graphicSubtype": "Atmosphere-Tornado" },
             { "main": "Clear", "description": "Clear sky", "graphicSubtype": "Clear-Sky" },
-            { "main": "Clouds", "description": "Few clouds: 11-25%", "graphicSubtype": "Clouds-Scattered" },
-            { "main": "Clouds", "description": "Scattered clouds: 25-50%", "graphicSubtype": "Clouds-Scattered" },
-            { "main": "Clouds", "description": "Broken clouds: 51-84%", "graphicSubtype": "Clouds-Scattered" },
-            { "main": "Clouds", "description": "Overcast clouds: 85-100%", "graphicSubtype": "Clouds-Overcast" }
+            { "main": "Clouds", "description": "Few cloud", "graphicSubtype": "Clouds-Scattered" },
+            { "main": "Clouds", "description": "Scattered clouds", "graphicSubtype": "Clouds-Scattered" },
+            { "main": "Clouds", "description": "Broken clouds", "graphicSubtype": "Clouds-Scattered" },
+            { "main": "Clouds", "description": "Overcast clouds", "graphicSubtype": "Clouds-Overcast" }
         ];
 
         async function fetchWeather() {
@@ -129,9 +129,11 @@
                 const weatherData = await weatherResponse.json();
 
                 const graphicSubtype = weatherConditions.find(condition => condition.description.toLowerCase() === weatherData.condition.toLowerCase())?.graphicSubtype || "Unknown";
-
+                
                 const weatherSummary = document.getElementById('weatherSummary');
-                weatherSummary.textContent = `${graphicSubtype} In ${weatherData.location}`;
+                console.log(weatherData);
+                console.log(graphicSubtype);
+                weatherSummary.textContent = `In ${weatherData.location}`;
                 // Temperature: ${weatherData.temperature}°C
                 // Condition: ${weatherData.condition}`;
 
