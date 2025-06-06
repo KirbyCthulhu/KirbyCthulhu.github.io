@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Treasure Box</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Ensure content starts at the top */
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #2e2b5f; /* Dark purple background */
+        }
+        h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0; /* Add spacing above and below */
+            background: linear-gradient(90deg, #6a0dad, #8b0000, #006400); /* Purple, dark red, and dark green */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sparkle 2s infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% {
+                text-shadow: 0 0 5px #6a0dad, 0 0 10px #8b0000, 0 0 15px #006400;
+            }
+            50% {
+                text-shadow: 0 0 10px #8b0000, 0 0 15px #006400, 0 0 20px #6a0dad;
+            }
+        }
+        .treasure-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 400px; /* Add spacing below the h1 */
+            position: absolute; /* Ensure object-container is positioned relative to treasure-container */
+        }
+        .treasure-box {
+            width: 150px;
+            height: 150px;
+            background-image: url('fortune-files/closed-treasure.png');
+            background-size: contain; /* Ensure the whole picture is shown */
+            background-repeat: no-repeat;
+            border-radius: 10px; /* Optional rounded corners */
+            cursor: pointer;
+            position: relative;
+            animation: sparkle 2s infinite;
+            transition: background-image 0.5s ease-in-out;
+            z-index: 998;
+        }
+        .treasure-box.open {
+            background-image: url('fortune-files/open-treasure.png');
+        }
+        .object-container {
+            position: absolute; /* Position relative to treasure-container */
+            top: -275px; /* Position above the treasure box */
+            text-align: center;
+            width: 300px;
+            opacity: 0;
+            transform: translateY(50px) scale(0.5); /* Start smaller and lower */
+            animation: pop-out 0.8s forwards;
+            animation-delay: 8.5s; /* Start after the flash animation ends */
+        }
+        @keyframes pop-out {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.5); /* Start small and below */
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1); /* Move upward and grow to full size */
+            }
+        }
+        .object-image {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+            background-size: contain;
+        }
+        .bonus-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #f0f0f0; /* Light text for contrast */
+        }
+        @keyframes flash {
+            0%, 25%, 50%, 75%, 100% {
+                background-color: #2e2b5f;
+            }
+            12.5%, 37.5%, 62.5%, 87.5% {
+                background-color: #f6ff0097;
+                box-shadow: 0 0 20px #fffb00, 0 0 40px #ff69b4, 0 0 60px #6a0dad; /* Sparkling effect */
+            }
+        }
+        .flash-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            animation: flash 8.5s linear;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Treasure Box</h1>
+    <div class="treasure-container">
+        <div class="treasure-box" id="treasureBox"></div>
+        <div class="object-container" id="objectContainer" style="display: none;">
+            <div id="obtainedText" class="bonus-text">You found</div>
+            <img id="objectImage" class="object-image" src="" alt="Treasure Object">
+            <div id="bonusText" class="bonus-text"></div>
+        </div>
+    </div>
+    <audio id="chestSound" src="fortune-files/chest-opening.mp3"></audio> <!-- Sound effect -->
+    <audio id="chestSoundShort" src="fortune-files/chest-opening-short.mp3"></audio> <!-- Sound effect -->
+
+    <script>
+        let globalDayValue = 0;
+        let seed = addDays(globalDayValue); // Initialize seed based on current timestamp
+        let seedCount = 0; // Initialize seed count
+
+                // Seeded random function
+        function seededRandom(seed) {
+            seed = (seed * 9301 + 49297) % 233280;
+            return seed / 233280;
+        }
+
+        function shuffleCharsByMonth(chars, month) {
+            // Use the month (1-12) as a seed to shuffle the characters
+            const seed = month;
+            const charsArray = chars.split(""); // Convert string to array for shuffling
+
+            for (let i = charsArray.length - 1; i > 0; i--) {
+                const j = Math.floor((seededRandom(seed + i) * (i + 1)) % charsArray.length);
+                [charsArray[i], charsArray[j]] = [charsArray[j], charsArray[i]]; // Swap characters
+            }
+
+            return charsArray.join(""); // Convert back to string
+        }
+
+        function random(len) {
+            let chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+            seedCount = seedCount + 1000; // Increment seed count for each call
+            chars = shuffleCharsByMonth(chars, addDaysGetMonth(globalDayValue)); // Shuffle characters based on the current month
+
+            // Generate the random string using the seed and seed count
+            return len ? chars.charAt(~~(seededRandom(seed + seedCount) * chars.length)) + random(len - 1) : "";
+        }
+
+        function addDaysGetMonth(days) {
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            const [month, day, year] = date.toLocaleDateString().split("/").map(Number); // Split date into parts (MM/DD/YYYY)
+            return month; // Combine parts into a unique seed
+        }
+
+        function addDays(days) {
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            const [month, day, year] = date.toLocaleDateString().split("/").map(Number); // Split date into parts (MM/DD/YYYY)
+            return year * 10000 + month * 100 + day; // Combine parts into a unique seed
+        }
+
+        function seededShuffle(array, seed) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(seed % (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                seed = (seed * 9301 + 49297) % 233280;
+            }
+            return shuffled;
+        }
+
+        function getRandomBonuses(dayString, items, count) {
+            const hash = Array.from(dayString).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            var shuffledItems = seededShuffle(items, dayString);
+            return seededShuffle(shuffledItems.slice(0, 20), dayString).slice(0, count);
+        }
+
+        const bonuses = [
+            "You won't step on a nail today.",
+            "Your coffee will taste extra good.",
+            "You will find a lucky penny.",
+            "Your favorite song will play on the radio.",
+            "You will avoid traffic jams.",
+            "Your socks will match perfectly.",
+            "You will remember where you left your keys.",
+            "You will have an amazing hair day.",
+            "You will laugh at a funny joke.",
+            "You will find a parking spot easily.",
+            "You will dodge every low-hanging branch today.",
+            "Every dog you see will secretly approve of you.",
+            "You will sneeze exactly zero times.",
+            "Your phone battery will mysteriously last 20% longer.",
+            "You’ll hear your favorite song in a completely random place.",
+            "Birds will not poop near you today.",
+            "All your typos will autocorrect in your favor.",
+            "You will not stub your toe, even a little.",
+            "Your cereal-to-milk ratio will be perfect.",
+            "You will win one (1) imaginary argument.",
+            "You’ll find a crisp high five when you need it most.",
+            "Your hoodie strings will stay even all day.",
+            "You will understand one obscure meme perfectly.",
+            "Every elevator you call will already be on your floor.",
+            "You’ll make a stranger laugh without even trying.",
+            "Your hiccups will end before they become annoying.",
+            "Your snack will be exactly as crunchy as you dreamed.",
+            "All pens you use today will work on the first try.",
+            "You will dodge one awkward conversation flawlessly.",
+            "Your reflection will give you a thumbs up. Somehow.",
+            "You gain the ability to find any object—once it’s no longer useful.",
+            "Your shadow will do a little dance every time you lie.",
+            "Every mirror shows you one frame ahead of time.",
+            "You can hear the whispers of bread.",
+            "You will hiccup exactly once per conversation.",
+            "Every door you open creaks like it knows something.",
+            "Your phone gains sentience but refuses to answer texts.",
+            "Your footsteps will sound like ominous drums—for others, not you.",
+            "You will attract moths, but only emotionally.",
+            "Your reflection winks at you when you're not looking directly at it.",
+            "One sock will always be slightly damp, but never wet.",
+            "You will receive one cryptic prophecy today, via customer service chatbot.",
+            "All cats will stare at you like they remember what you did.",
+            "You are followed by the smell of toast. No one else smells it.",
+            "You’ll remember something important, but only in a language you don’t speak.",
+            "Your laugh will echo longer than it should. People will notice.",
+            "You’ll win an argument, but forget what it was about immediately.",
+            "You may levitate, but only when it’s inconvenient.",
+            "You will receive a message... but it’s meant for another version of you.",
+            "You can read minds, but only of pigeons. They're disappointed in you.",
+            "You are followed by a faint kazoo solo no one else can hear.",
+            "Every vending machine you see will sigh slightly.",
+            "Your tears summon fog, regardless of the weather.",
+            "You will always find a spoon when you need a fork. Always.",
+            "You’ll have prophetic dreams, but only about minor shoe malfunctions.",
+            "Your name is briefly forgotten by the universe between 2:03 and 2:05 PM.",
+            "Your reflection ages one second faster than you do.",
+            "You will hear your ringtone in the distance, even if your phone is off.",
+            "All statues seem to be looking just slightly to your left.",
+            "Your fingers will occasionally emit static that smells like cinnamon.",
+            "The next sandwich you eat will whisper your full name.",
+            "You can summon bees, but only once and only at a funeral.",
+            "You’ll receive one perfect comeback—thirty minutes too late.",
+            "Every photo you appear in today gains one additional shadow.",
+            "You’ll be unable to lie, but will compulsively speak in riddles.",
+            "You will always enter a room as if you interrupted something important.",
+            "One sock will vanish and return wiser.",
+            "You are haunted by the distant sound of a dial-up modem.",
+            "A crow will nod respectfully to you. That’s the good part. Later, it returns.",
+            "You will blink and lose ten seconds. You will not get them back.",
+            "Your reflection smiles before you do.",
+            "You will hear your own voice calling your name from behind you. Do not turn around.",
+            "A door appears where none was before. You will forget it once you look away.",
+            "You feel watched. The feeling is not wrong.",
+            "Today, your shadow detaches at noon. It returns at dusk—soaked and silent.",
+            "Something follows you, but only when you walk barefoot.",
+            "You will hum a song you’ve never heard. Later, you'll hear it playing from a room that should be empty.",
+            "All clocks will be off by one minute. Only you will notice.",
+            "You will see a stranger who looks exactly like you. They will not see you.",
+            "You will find a note in your handwriting that simply says, 'Run.'",
+            "At some point today, every screen you pass will flicker once. Just once.",
+            "A stranger will say something only you should know. They will not remember saying it.",
+            "The light in your fridge lingers just a second too long after you close it.",
+            "You will look at your hands and feel unfamiliar.",
+            "You’ll pass a mirror and your reflection will be turned slightly away.",
+            "You remember something from childhood that never happened. It’s coming back.",
+            "You find a tooth in your pocket. It is not yours. It is warm.",
+            "You hear footsteps behind you matching yours exactly—until they don’t.",
+            "Someone will call your phone from your number. Do not answer.",
+            "You will instinctively know the perfect microwave time for leftovers, but only today.",
+            "You can perfectly imitate a dial tone. This has no practical value.",
+            "You will blink in perfect rhythm with traffic lights. No one will notice.",
+            "All your yawns will sound slightly more dramatic.",
+            "You gain the ability to name any squirrel you see. They will not care.",
+            "Your belly button will repel lint with 5% more efficiency.",
+            "You can hear the word ‘banana’ being spoken from up to 50 feet away.",
+            "Your hands will always be the exact right temperature for petting a cat. Cat approval not guaranteed.",
+            "Every straw you use today will be the bendy kind. You are powerful.",
+            "You can predict when toast will pop. Within three seconds.",
+            "Your shoes will squeak only when it would be funny.",
+            "You will accidentally speak in iambic pentameter for seven consecutive words.",
+            "You will high-five yourself in a mirror. It will feel satisfying.",
+            "You will be exactly 5% better at whistling. This won’t come up.",
+            "One single raindrop will always avoid your glasses.",
+            "You can teleport one sock per day to the laundry. You won’t know which one.",
+            "Your sneeze today will echo majestically.",
+            "You will remember that one actor's name. No one else will be around.",
+            "Today, you will be immune to brain freeze. You may never need it.",
+            "Your cereal will stay crunchy 15 seconds longer than expected."
+        ];
+
+        const treasureBox = document.getElementById('treasureBox');
+        const objectContainer = document.getElementById('objectContainer');
+        const objectImage = document.getElementById('objectImage');
+        const bonusText = document.getElementById('bonusText');
+        const chestSound = document.getElementById('chestSound');
+        const chestSoundShort = document.getElementById('chestSoundShort');
+
+        let isClicked = false; // Prevent multiple clicks
+
+        treasureBox.addEventListener('click', () => {
+            if (isClicked) return; // Do nothing if already clicked
+            isClicked = true;
+
+            // Play sound effect
+            chestSoundShort.play();
+            chestSound.play();
+            
+            // Flash effect
+            const flash = document.createElement('div');
+            flash.className = 'flash-effect';
+            document.body.appendChild(flash);
+
+            const dateSet = addDays(globalDayValue); // Use today's date
+            //const randomObject = getRandomItem(dateSet, objects);
+            const randomBonus = getRandomBonuses(dateSet, bonuses);
+
+            Imgur.fetch(); // Fetch a random image from Imgur
+            const randomBonuses = getRandomBonuses(dateSet, bonuses, 1); // Get 1 random bonuses
+            bonusText.textContent = randomBonuses.join("\n"); // Display bonuses
+
+            treasureBox.classList.add('open');
+            objectContainer.style.display = 'block';
+
+            // Remove flash effect after animation
+            setTimeout(() => {
+                document.body.removeChild(flash);
+            }, 8500); // Match the duration of the flash animation
+        });
+
+
+        let Imgur = {
+            fetch: function() {
+                let self = this;
+                self.hunt(function(id) {
+                        objectImage.src = `https://i.imgur.com/${id}s.png`;
+                    });
+            },
+            hunt: function(cb) {
+                let self = this,
+                    id = random(5),
+                    img = new Image;
+                    img.src = "https://imgur.com/" + id + "s.png";
+                    img.onload = function() {
+                        if (img.width == 161 && img.height == 81) {
+                            // assume this is an imgur error image, and retry.
+                            fail();
+                        } else {
+                            cb(id);
+                        }
+                }
+                img.onerror = fail; // no escape.
+                function fail() {
+                    self.hunt(cb);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
